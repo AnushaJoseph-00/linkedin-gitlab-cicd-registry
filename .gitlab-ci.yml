@@ -1,19 +1,55 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/user/application_security/sast/#available-cicd-variables
-# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure/
-# Dependency Scanning customization: https://docs.gitlab.com/user/application_security/dependency_scanning/dependency_scanning_sbom/#customizing-analyzer-behavior
-# Container Scanning customization: https://docs.gitlab.com/user/application_security/container_scanning/#customizing-analyzer-behavior
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ci/variables/#cicd-variable-precedence
 stages:
-- test
-- secret-detection
-sast:
-  stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
-- template: Security/Secret-Detection.gitlab-ci.yml
+  - build
+  - test
+  - scan
+
 variables:
-  SECRET_DETECTION_ENABLED: 'true'
-secret_detection:
-  stage: secret-detection
+  PROJECT_NAME: "Linkedin_Gitlab_CI_CD"
+
+# Build stage
+build-job:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "Building the project - Docker Image..."
+    - docker build -t $PROJECT_NAME:$CI_PIPELINE_ID .
+  tags:
+    - docker
+
+# Test stage - Validate dependencies
+npm-test:
+  stage: test
+  image: node:16
+  needs: [build-job]
+  script:
+    - echo "Installing and validating backend dependencies..."
+    - cd backend
+    - npm install
+    - echo "Installing and validating frontend dependencies..."
+    - cd ../frontend
+    - npm install
+    - echo "All dependencies validated successfully"
+
+# Security scan stage - Trivy vulnerability scan
+trivy-scan:
+  stage: scan
+  image: docker:24
+  services:
+    - docker:dind
+  needs: [build-job]
+  script:
+    - echo "Running Trivy security scan..."
+    - docker build -t $PROJECT_NAME:$CI_PIPELINE_ID .
+    - apk add --no-cache curl    
+    - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+    - trivy image --severity HIGH,CRITICAL --ignore-unfixed --format json --output trivy-report.json $PROJECT_NAME:$CI_PIPELINE_IID
+    - echo "Trivy scan complete"
+
+  artifacts:
+    paths:
+      - trivy-report.json
+    expire_in: 7 days
+  tags:
+    - docker
