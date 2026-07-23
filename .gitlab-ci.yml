@@ -4,7 +4,7 @@ stages:
   - scan
 
 variables:
-  PROJECT_NAME: "Linkedin_Gitlab_CI_CD"
+  PROJECT_NAME: "linkedin-gitlab-cicd"
 
 # Build stage
 build-job:
