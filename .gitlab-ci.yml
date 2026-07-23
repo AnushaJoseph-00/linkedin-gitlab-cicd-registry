@@ -14,7 +14,7 @@ build-job:
     - docker:dind
   script:
     - echo "Building the project - Docker Image..."
-    - docker build -t $PROJECT_NAME:$CI_PIPELINE_ID .
+    - docker build -t $PROJECT_NAME:$CI_PIPELINE_IID .
 
 
 # Test stage - Validate dependencies
@@ -40,7 +40,7 @@ trivy-scan:
   needs: [build-job]
   script:
     - echo "Running Trivy security scan..."
-    - docker build -t $PROJECT_NAME:$CI_PIPELINE_ID .
+    - docker build -t $PROJECT_NAME:$CI_PIPELINE_IID .
     - apk add --no-cache curl    
     - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
     - trivy image --severity HIGH,CRITICAL --ignore-unfixed --format json --output trivy-report.json $PROJECT_NAME:$CI_PIPELINE_IID
