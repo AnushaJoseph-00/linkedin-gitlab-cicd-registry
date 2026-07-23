@@ -52,8 +52,8 @@ trivy-scan:
       - trivy-report.json
     expire_in: 7 days
 
-  notify-on-failure:
-    stage: notify
-    script:
-      - echo "🚨 Build or Test job failed for ${PROJECT_NAME}! Please check logs."
-    when: on_failure
+notify-on-failure:
+  stage: notify
+  script:
+    - echo "🚨 Build or Test job failed for ${PROJECT_NAME}! Please check logs."
+  when: on_failure
