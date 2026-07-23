@@ -15,8 +15,7 @@ build-job:
   script:
     - echo "Building the project - Docker Image..."
     - docker build -t $PROJECT_NAME:$CI_PIPELINE_ID .
-  tags:
-    - docker
+
 
 # Test stage - Validate dependencies
 npm-test:
@@ -51,5 +50,3 @@ trivy-scan:
     paths:
       - trivy-report.json
     expire_in: 7 days
-  tags:
-    - docker
