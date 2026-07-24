@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - scan
+  - notify
 
 variables:
   PROJECT_NAME: "linkedin-gitlab-cicd"
@@ -50,3 +51,9 @@ trivy-scan:
     paths:
       - trivy-report.json
     expire_in: 7 days
+
+notify-on-failure:
+  stage: notify
+  script:
+    - echo "🚨 Build or Test job failed for ${PROJECT_NAME}! Please check logs."
+  when: on_failure
