@@ -1,93 +1,150 @@
-# linkedin-project
+# LinkedIn App — DevSecOps Pipeline | GitLab CI | Trivy | GitLab Container Registry
 
+A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating automated Docker builds, dependency validation, security vulnerability scanning, and container image delivery to GitLab Container Registry using GitLab CI/CD.
 
+---
 
-## Getting started
+## Pipeline Overview
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+![Pipeline Success](images/pipeline-success.png)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## Tech Stack
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+| Category | Tool |
+|----------|------|
+| Application | React.js + Node.js (Express) |
+| Database | MongoDB (local instance on port 27017) |
+| Containerisation | Docker (Multi-stage build) |
+| CI/CD | GitLab CI/CD |
+| Security Scanning | Trivy |
+| Image Registry | GitLab Container Registry |
+| Cloud | GitLab SaaS |
+
+---
+
+## Pipeline Stages
+
+### 1. Build
+- Builds Docker image using `docker:latest` with Docker-in-Docker (DinD)
+- Tags image with `$CI_PIPELINE_IID` for traceability
+
+![Build Stage](images/build-success.png)
+
+### 2. Test
+- Runs `npm install` on both `frontend/` and `backend/`
+- Validates all Node.js dependencies are installable
+- Caches `node_modules` to speed up future runs
+- Fails pipeline if any dependency is broken
+
+![Test Stage](images/npm-test-success.png)
+
+### 3. Security Scan
+- Rebuilds Docker image in isolated scan environment
+- Installs and runs **Trivy** vulnerability scanner
+- Scans for **HIGH** and **CRITICAL** vulnerabilities
+- Only flags issues with a fix available
+- Exports scan results as a **JSON artifact**
+
+![Trivy Scan](images/trivy-scan-success.png)
+
+### 4. Push
+- Authenticates to GitLab Container Registry automatically via built-in CI variables
+- Tags image with both `$CI_PIPELINE_IID` and `latest`
+- Pushes both tags to registry
+- Only runs on `main` branch
+
+![Registry Push](images/registry-push.png)
+
+### 5. Notify
+- Runs only when any previous stage fails
+- Prints failure notification with project name
+- Can be extended to send Slack/email alerts
+
+---
+
+## GitLab Container Registry
+
+![Container Registry](images/gitlab-registry.png)
+
+---
+
+## Trivy Security Scan Artifact
+
+![Trivy Artifact](images/trivy-artifact.png)
+
+---
+
+## Project Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/devopsorg-group/linkedin-project.git
-git branch -M main
-git push -uf origin main
+linkedin-project/
+├── .gitlab-ci.yml
+├── frontend/
+├── backend/
+├── Dockerfile
+├── .gitignore
+└── README.md
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/devopsorg-group/linkedin-project/-/settings/integrations)
+## Pipeline Variables
 
-## Collaborate with your team
+| Variable | Description |
+|----------|-------------|
+| `CI_REGISTRY` | GitLab Container Registry URL (auto-injected) |
+| `CI_REGISTRY_USER` | Registry username (auto-injected) |
+| `CI_REGISTRY_PASSWORD` | Registry token (auto-injected) |
+| `CI_REGISTRY_IMAGE` | Full image path (auto-injected) |
+| `CI_PIPELINE_IID` | Unique pipeline number for image tagging |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+No manual secrets required : GitLab injects all registry credentials automatically!
 
-## Test and Deploy
+---
 
-Use the built-in continuous integration in GitLab.
+## Key Decisions
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+- **Docker-in-Docker (DinD)** — enables Docker commands inside GitLab CI runner containers
+- **npm validation before scan** — catches dependency issues before building final image
+- **Trivy after build, before push** — ensures no vulnerable images reach the registry
+- **GitLab Container Registry over AWS ECR** — zero credential setup, native GitLab integration
+- **`only: main`** — only production-ready code on main branch reaches the registry
+- **`when: on_failure`** — notify job only triggers when pipeline fails, not on success
 
-***
+---
 
-# Editing this README
+## Comparison — GitHub Actions vs GitLab CI
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| Feature | GitHub Actions | GitLab CI |
+|---------|---------------|-----------|
+| Config file | `.github/workflows/deploy.yml` | `.gitlab-ci.yml` |
+| Pipeline trigger | `on: push` | automatic on push |
+| Registry | AWS ECR | GitLab Container Registry |
+| Secrets | GitHub Secrets | CI/CD Variables |
+| Auth for registry | Manual AWS keys | Auto-injected |
+| Security scanning | Trivy | Trivy |
 
-## Suggestions for a good README
+---
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Future Improvement Suggestion
 
-## Name
-Choose a self-explaining name for your project.
+- Deploy to AWS ECS Fargate
+- Add Slack notification on pipeline failure
+- Add SAST scanning using GitLab native security
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+---
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Related Project
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+GitHub Actions version of this pipeline:
+[linkedin-devsecops-githubactions-ecr](https://github.com/AnushaJoseph-00/linkedin-devsecops-githubactions-ecr)
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+---
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Credits
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Original MERN LinkedIn clone by [Gustavo Noronha](https://github.com/gusttavonl/LinkedInMernClone)
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+CI/CD pipeline, Dockerfile, and GitLab CI configuration built by [AnushaJoseph-00](https://github.com/AnushaJoseph-00)
