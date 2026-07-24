@@ -104,12 +104,12 @@ No manual secrets required : GitLab injects all registry credentials automatical
 
 ## Key Decisions
 
-- **Docker-in-Docker (DinD)** — enables Docker commands inside GitLab CI runner containers
-- **npm validation before scan** — catches dependency issues before building final image
-- **Trivy after build, before push** — ensures no vulnerable images reach the registry
-- **GitLab Container Registry over AWS ECR** — zero credential setup, native GitLab integration
-- **`only: main`** — only production-ready code on main branch reaches the registry
-- **`when: on_failure`** — notify job only triggers when pipeline fails, not on success
+- **Docker-in-Docker (DinD)** - enables Docker commands inside GitLab CI runner containers
+- **npm validation before scan** - catches dependency issues before building final image
+- **Trivy after build, before push** - ensures no vulnerable images reach the registry
+- **GitLab Container Registry over AWS ECR** - zero credential setup, native GitLab integration
+- **`only: main`** - only production-ready code on main branch reaches the registry
+- **`when: on_failure`** - notify job only triggers when pipeline fails, not on success
 
 ---
 
