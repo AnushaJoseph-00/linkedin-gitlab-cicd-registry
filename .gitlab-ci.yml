@@ -2,8 +2,9 @@ stages:
   - build
   - test
   - scan
-  - push
   - notify
+  - push
+
   
 variables:
   PROJECT_NAME: "linkedin-gitlab-cicd"
