@@ -1,4 +1,4 @@
-# LinkedIn App — DevSecOps Pipeline | GitLab CI | Trivy | GitLab Container Registry
+# LinkedIn App: DevSecOps Pipeline | GitLab CI | Trivy | GitLab Container Registry
 
 A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating automated Docker builds, dependency validation, security vulnerability scanning, and container image delivery to GitLab Container Registry using GitLab CI/CD.
 
@@ -6,7 +6,7 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 
 ## Pipeline Overview
 
-![Pipeline Success](images/pipeline-success.png)
+![Pipeline Success](Gitlab_Pipeline_Passing.jpg)
 
 ---
 
@@ -30,15 +30,13 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 - Builds Docker image using `docker:latest` with Docker-in-Docker (DinD)
 - Tags image with `$CI_PIPELINE_IID` for traceability
 
-![Build Stage](images/build-success.png)
+
 
 ### 2. Test
 - Runs `npm install` on both `frontend/` and `backend/`
 - Validates all Node.js dependencies are installable
 - Caches `node_modules` to speed up future runs
 - Fails pipeline if any dependency is broken
-
-![Test Stage](images/npm-test-success.png)
 
 ### 3. Security Scan
 - Rebuilds Docker image in isolated scan environment
@@ -47,15 +45,12 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 - Only flags issues with a fix available
 - Exports scan results as a **JSON artifact**
 
-![Trivy Scan](images/trivy-scan-success.png)
-
 ### 4. Push
 - Authenticates to GitLab Container Registry automatically via built-in CI variables
 - Tags image with both `$CI_PIPELINE_IID` and `latest`
 - Pushes both tags to registry
 - Only runs on `main` branch
 
-![Registry Push](images/registry-push.png)
 
 ### 5. Notify
 - Runs only when any previous stage fails
@@ -64,15 +59,18 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 
 ---
 
+
+## GitLab Repository
+
+![Container Registry](Gitlab_Repo_Image.jpg)
+
 ## GitLab Container Registry
 
-![Container Registry](images/gitlab-registry.png)
-
----
+![Container Registry](Container_Registry_Image.jpg)
 
 ## Trivy Security Scan Artifact
 
-![Trivy Artifact](images/trivy-artifact.png)
+![Trivy Artifact](Artifact_Image.jpg)
 
 ---
 
