@@ -53,6 +53,13 @@ trivy-scan:
       - trivy-report.json
     expire_in: 7 days
 
+notify-on-failure:
+  stage: notify
+  script:
+    - echo "🚨 Build or Test job failed for ${PROJECT_NAME}! Please check logs."
+  when: on_failure
+
+
 # Push Stage - Push to GitLab Container Registry
 push-to-registry:
   stage: push
@@ -71,9 +78,4 @@ push-to-registry:
     - echo "Image pushed successfully!"
   only:
     - main
-    
-notify-on-failure:
-  stage: notify
-  script:
-    - echo "🚨 Build or Test job failed for ${PROJECT_NAME}! Please check logs."
-  when: on_failure
+
