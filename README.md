@@ -8,6 +8,11 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 
 ![Pipeline Success](Gitlab_Pipeline_Passing.jpg)
 
+
+## Pipeline Code
+View the `.gitlab-ci.yml` file in this repo for the full pipeline configuration.
+Live pipeline runs on GitLab: [View Pipeline](https://gitlab.com/devopsorg-group/linkedin-project/-/blob/main/.gitlab-ci.yml?ref_type=heads)
+
 ---
 
 ## Tech Stack
@@ -113,7 +118,7 @@ No manual secrets required : GitLab injects all registry credentials automatical
 
 ---
 
-## Comparison — GitHub Actions vs GitLab CI
+## Comparison: GitHub Actions vs GitLab CI
 
 | Feature | GitHub Actions | GitLab CI |
 |---------|---------------|-----------|
