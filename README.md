@@ -68,9 +68,9 @@ A DevSecOps CI/CD pipeline built on top of a MERN LinkedIn clone, demonstrating 
 
 ![Container Registry](Container_Registry_Image.jpg)
 
-## Trivy Security Scan Artifact
+## Artifact
 
-![Trivy Artifact](Artifact_Image.jpg)
+![Artifact](Artifact_Image.jpg)
 
 ---
 
